@@ -1,54 +1,89 @@
 import jsPDF from 'jspdf';
 
+export const OFFICIAL_MINISTRIES = [
+  "Department of Agriculture, Cooperation & Farmers Welfare",
+  "Department of Consumer Affairs",
+  "Department of Food & Public Distribution",
+  "Department of Higher Education",
+  "Department of Posts",
+  "Department of School Education and Literacy",
+  "Department of Telecommunications",
+  "Ministry of AYUSH",
+  "Ministry of Civil Aviation",
+  "Ministry of Electronics & Information Technology",
+  "Ministry of Environment, Forest and Climate Change",
+  "Ministry of External Affairs",
+  "Ministry of Home Affairs",
+  "Ministry of Housing & Urban Affairs",
+  "Ministry of Information & Broadcasting",
+  "Ministry of Labour & Employment",
+  "Ministry of Micro, Small and Medium Enterprises",
+  "Ministry of Railways",
+  "Ministry of Road Transport & Highways",
+  "Ministry of Rural Development",
+  "Ministry of Social Justice & Empowerment",
+  "Prime Minister's Office"
+];
+
+// Sanitizes text to match rtionline.gov.in allowed regex: A-Z a-z 0-9 , . - _ ( ) / @ : & ? \ %
+export function sanitizeRtiText(text) {
+  if (!text) return '';
+  // Replace smart quotes, double quotes, hashes, asterisks with safe equivalents
+  return text
+    .replace(/["'”“’]/g, '')
+    .replace(/[#$^*+=~`|<>{}[\]]/g, ' ')
+    .replace(/\s+/g, ' ');
+}
+
 export function generateRtiDraft(params) {
   const query = (params.queryText || '').toLowerCase();
   
-  let department = 'Public Works Department (PWD)';
-  let pioTitle = 'Public Information Officer (PIO)';
+  let selectedMinistry = params.selectedMinistry || 'Ministry of Housing & Urban Affairs';
+  let department = selectedMinistry;
   let questions = [];
 
   if (query.includes('road') || query.includes('pothole') || query.includes('bridge') || query.includes('construction') || query.includes('contractor')) {
-    department = 'Public Works Department (PWD) / Municipal Corporation';
+    department = params.selectedMinistry || 'Ministry of Road Transport & Highways / Municipal Corporation';
     questions = [
-      `Please provide the copy of the sanction order, sanctioned budget, and tender document for the road work in ${params.city} mentioned above.`,
-      `Please provide the names of the contractor, project manager, and supervising engineer assigned to this work.`,
-      `What is the scheduled start date, completion date, and current physical & financial progress of the project?`,
-      `If the project is delayed, please provide copies of all file notings, extension requests, and penalty notices issued to the contractor.`
+      `Sanction order, budget copy, and tender document for the road work in ${params.city || 'locality'}.`,
+      `Name of contractor, project manager, and supervising engineer assigned to this work.`,
+      `Scheduled start date, completion date, and current physical & financial progress.`,
+      `If delayed, copies of file notings, extension requests, and penalty notices issued.`
     ];
   } else if (query.includes('ration') || query.includes('food') || query.includes('pds') || query.includes('grain')) {
-    department = 'Department of Food & Civil Supplies / Consumer Affairs';
+    department = params.selectedMinistry || 'Department of Food & Public Distribution / Consumer Affairs';
     questions = [
-      `Please provide the daily stock register and distribution register entries for the FPS (Fair Price Shop) catering to my area for the past 6 months.`,
-      `What is the current status of processing my Ration Card application/renewal (Application ref: ${params.specificDetails || 'as attached'})?`,
-      `Please provide the daily progress report and reason for delay if the processing time exceeds the Citizen Charter timeline.`
+      `Daily stock register and distribution register entries for FPS catering to my area for last 6 months.`,
+      `Current processing status of my Ration Card application/renewal ref: ${params.specificDetails || 'as attached'}.`,
+      `Daily progress report and reason for delay if processing exceeds Citizen Charter timeline.`
     ];
   } else if (query.includes('water') || query.includes('drainage') || query.includes('sewage') || query.includes('jal')) {
-    department = 'Jal Board / Municipal Water Supply & Sanitation Department';
+    department = params.selectedMinistry || 'Ministry of Housing & Urban Affairs / Water Supply Dept';
     questions = [
-      `Please provide certified copies of water quality test reports conducted in ${params.city} area over the last 3 months.`,
-      `What is the total expenditure incurred on maintenance and pipeline repairs in this locality during the current financial year?`,
-      `Please state the official daily schedule of water supply for this area and reasons for unannounced water cuts.`
+      `Certified copies of water quality test reports conducted in ${params.city || 'area'} over last 3 months.`,
+      `Total expenditure incurred on maintenance and pipeline repairs in this locality during current financial year.`,
+      `Official daily schedule of water supply for this area and recorded reasons for unannounced cuts.`
     ];
   } else if (query.includes('police') || query.includes('fir') || query.includes('complaint') || query.includes('investigation')) {
-    department = 'Office of the District Superintendent of Police / Commissionerate';
+    department = params.selectedMinistry || 'Ministry of Home Affairs / Police Commissionerate';
     questions = [
-      `Please state the daily progress report and file notings regarding Complaint/FIR No: ${params.specificDetails || 'submitted by me'}.`,
-      `Please provide the name and designation of the Investigating Officer (IO) assigned to this matter.`,
-      `If no action has been taken within 30 days, please provide certified copies of reasons recorded in the official diary.`
+      `Daily progress report and file notings regarding Complaint/FIR No: ${params.specificDetails || 'submitted by me'}.`,
+      `Name and designation of Investigating Officer (IO) assigned to this matter.`,
+      `If no action taken within 30 days, certified copies of reasons recorded in official diary.`
     ];
   } else if (query.includes('pension') || query.includes('epfo') || query.includes('provident') || query.includes('welfare')) {
-    department = 'Department of Social Welfare / Employees Provident Fund Organisation';
+    department = params.selectedMinistry || 'Ministry of Labour & Employment / EPFO';
     questions = [
-      `Please provide the exact status of my pension/EPF disbursement application (Ref: ${params.specificDetails || 'N/A'}).`,
-      `Please state the date of receipt of the application, date of verification, and official file movement history.`,
-      `If payment is delayed, please state the name of the dealing assistant responsible for the delay.`
+      `Exact status of my pension/EPF disbursement application Ref: ${params.specificDetails || 'N/A'}.`,
+      `Date of receipt of application, date of verification, and official file movement history.`,
+      `If payment delayed, name of dealing assistant responsible for the delay.`
     ];
   } else {
-    department = 'Office of the District Collector / Competent Public Authority';
+    department = params.selectedMinistry || 'Office of Competent Public Authority';
     questions = [
-      `Please provide certified copies of all files, correspondence, and notings related to the subject matter: "${params.queryText}".`,
-      `Please provide the exact timeline mandated by the Citizen Charter for resolving this class of public grievance/request.`,
-      `Please list the names and designations of officers who handled this file along with dates of file movement.`
+      `Certified copies of all files, correspondence, and notings regarding: ${params.queryText}.`,
+      `Exact timeline mandated by Citizen Charter for resolving this class of public grievance/request.`,
+      `List of names and designations of officers who handled this file along with movement dates.`
     ];
   }
 
@@ -58,53 +93,42 @@ export function generateRtiDraft(params) {
     year: 'numeric'
   });
 
-  const fullText = `FORMATTED APPLICATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005
+  // Strict rtionline.gov.in portal text structure
+  const portalTextUnsanitized = `APPLICATION UNDER SECTION 6(1) OF RTI ACT 2005
 
-To,
-The Public Information Officer (PIO),
-${department},
-Government of ${params.state || 'India'},
-District: ${params.city || 'State Capital'}
+TO: Public Information Officer (PIO)
+MINISTRY/DEPT: ${department}
+DISTRICT/STATE: ${params.city || 'District'}, ${params.state || 'State'}
+DATE: ${currentDate}
 
-Date: ${currentDate}
+APPLICANT DETAILS:
+Name: ${params.applicantName || 'Citizen Applicant'}
+Mobile: ${params.phone || 'N/A'}
+Address: ${params.address || 'Address provided'}, ${params.city}, ${params.state}
 
-1. FULL NAME OF THE APPLICANT:
-   ${params.applicantName || 'Citizen Applicant'}
+SUBJECT: Request for information under RTI Act 2005 regarding ${params.queryText}
 
-2. ADDRESS FOR CORRESPONDENCE:
-   ${params.address || 'Address provided'}, ${params.city}, ${params.state}
-   Mobile: ${params.phone || 'N/A'} | Email: ${params.email || 'N/A'}
+INFORMATION SOUGHT:
+${questions.map((q, idx) => `4.${idx + 1}. ${q}`).join('\n')}
 
-3. SUBJECT MATTER OF INFORMATION:
-   Request for information under Section 6(1) of the RTI Act 2005 regarding:
-   "${params.queryText}"
+FEE DETAILS:
+${params.bplStatus ? `BPL Applicant (Exempt from RTI Fee). Card No: ${params.bplCardNo || 'Attached'}.` : 'Attached prescribed fee of Rs 10.'}
 
-4. SPECIFIC INFORMATION SOUGHT:
-${questions.map((q, idx) => `   4.${idx + 1}. ${q}`).join('\n\n')}
-
-5. PERIOD TO WHICH INFORMATION RELATES:
-   Last 2 Years to Current Date.
-
-6. APPLICATION FEE DETAILS:
-   ${params.bplStatus ? `Exempted from RTI Fee under BPL category (BPL Card No: ${params.bplCardNo || 'Enclosed'}).` : 'I have attached the mandatory application fee of ₹10/- (Rupees Ten Only) via Postal Order / Online Receipt.'}
-
-7. PREFERRED MODE OF INFORMATION:
-   By Registered Post / Certified Copies at my residential address listed above.
-
-8. DECLARATION:
-   I am a citizen of India. The information sought does not fall under any of the exemptions contained in Section 8 & 9 of the RTI Act 2005.
-
-Yours faithfully,
-
-
-(${params.applicantName || 'Citizen Applicant'})
+DECLARATION:
+I am an Indian citizen. Information requested does not fall under Section 8 or 9 exemptions.
 `;
+
+  // Sanitize to fit rtionline.gov.in 3000 character limit & allowed regex
+  let portalText = sanitizeRtiText(portalTextUnsanitized);
+  if (portalText.length > 2950) {
+    portalText = portalText.substring(0, 2950) + '...';
+  }
 
   return {
     department,
-    pioTitle,
     questions,
-    fullText,
+    portalText,
+    charCount: portalText.length,
     currentDate
   };
 }
@@ -114,13 +138,15 @@ export function downloadRtiPdf(draft, params) {
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('APPLICATION UNDER RIGHT TO INFORMATION ACT, 2005', 15, 20);
+  doc.text('APPLICATION UNDER RIGHT TO INFORMATION ACT 2005', 15, 20);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   
-  const lines = doc.splitTextToSize(draft.fullText, 180);
+  const lines = doc.splitTextToSize(draft.portalText, 180);
   doc.text(lines, 15, 32);
   
-  doc.save(`RTI_Application_${params.city || 'Citizen'}_${Date.now()}.pdf`);
+  // rtionline.gov.in rule: file name < 12 alphanumeric characters, NO spaces
+  const safeFileName = `RTI_${Date.now().toString().slice(-6)}.pdf`;
+  doc.save(safeFileName);
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileText, Sparkles, Download, Copy, Check, Info, Building2, HelpCircle } from 'lucide-react';
-import { generateRtiDraft, downloadRtiPdf } from '../utils/rtiGenerator';
+import { FileText, Sparkles, Download, Copy, Check, Info, Building2, HelpCircle, ShieldCheck, ExternalLink } from 'lucide-react';
+import { generateRtiDraft, downloadRtiPdf, OFFICIAL_MINISTRIES } from '../utils/rtiGenerator';
 
 export const RtiDraftingAgent = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +10,7 @@ export const RtiDraftingAgent = () => {
     email: '',
     state: 'Delhi (NCT)',
     city: 'New Delhi',
+    selectedMinistry: 'Ministry of Housing & Urban Affairs',
     queryText: '',
     specificDetails: '',
     bplStatus: false,
@@ -35,7 +36,7 @@ export const RtiDraftingAgent = () => {
 
   const handleCopy = () => {
     if (!generatedDraft) return;
-    navigator.clipboard.writeText(generatedDraft.fullText);
+    navigator.clipboard.writeText(generatedDraft.portalText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -48,13 +49,13 @@ export const RtiDraftingAgent = () => {
         
         <div className="max-w-3xl space-y-3 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" /> Plain Language to Legal RTI Converter
+            <ShieldCheck className="w-3.5 h-3.5" /> Official rtionline.gov.in Compliant Format
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Right to Information (RTI) Drafting Agent
           </h2>
           <p className="text-slate-300 text-sm leading-relaxed">
-            Convert any plain-English or vernacular query into a formally formatted RTI Application under Section 6(1) of the RTI Act 2005. Automatically routes your query to the designated Public Information Officer (PIO) and formats statutory questions.
+            Formats your plain-language query into the exact 3,000-character, regex-compliant format required by the <strong>rtionline.gov.in</strong> portal (DoPT, Govt of India).
           </p>
         </div>
       </div>
@@ -64,13 +65,41 @@ export const RtiDraftingAgent = () => {
         {/* Input Form Column */}
         <div className="lg:col-span-6 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-orange-400" /> Enter Application Details
-            </h3>
+            
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-orange-400" /> RTI Application Details
+              </h3>
+              <a
+                href="https://rtionline.gov.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-bold text-orange-400 hover:underline flex items-center gap-1"
+              >
+                <span>rtionline.gov.in</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
 
             <form onSubmit={handleGenerate} className="space-y-4">
               
-              {/* Applicant Name & Address */}
+              {/* Ministry / Public Authority Select */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-orange-400" /> Select Ministry / Department / Public Authority *
+                </label>
+                <select
+                  value={formData.selectedMinistry}
+                  onChange={(e) => setFormData({ ...formData, selectedMinistry: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-orange-500 cursor-pointer"
+                >
+                  {OFFICIAL_MINISTRIES.map((m, idx) => (
+                    <option key={idx} value={m} className="bg-slate-900">{m}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Applicant Name & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Applicant Full Name *</label>
@@ -120,7 +149,7 @@ export const RtiDraftingAgent = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">Residential Address</label>
+                <label className="text-xs font-bold text-slate-300">Address for Correspondence</label>
                 <input
                   type="text"
                   placeholder="e.g. Flat 402, Green Enclave, Sector 12"
@@ -134,7 +163,7 @@ export const RtiDraftingAgent = () => {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-slate-300">What information do you want to ask? *</label>
-                  <span className="text-[11px] text-orange-400">Plain English / Hindi</span>
+                  <span className="text-[11px] text-orange-400 font-mono">Max 3,000 chars</span>
                 </div>
                 <textarea
                   rows={4}
@@ -175,7 +204,7 @@ export const RtiDraftingAgent = () => {
                   className="w-4 h-4 accent-orange-500 rounded cursor-pointer"
                 />
                 <label htmlFor="bplCheck" className="text-xs font-medium text-slate-300 cursor-pointer">
-                  Below Poverty Line (BPL) Applicant (Exempt from ₹10 Fee)
+                  Is Applicant Below Poverty Line (BPL)? (Exempt from ₹10 Fee)
                 </label>
               </div>
 
@@ -183,7 +212,7 @@ export const RtiDraftingAgent = () => {
                 type="submit"
                 className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-500 text-white font-extrabold rounded-xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 transition-all"
               >
-                <Sparkles className="w-5 h-5" /> Generate Section 6(1) RTI Draft
+                <Sparkles className="w-5 h-5" /> Generate rtionline.gov.in Text
               </button>
 
             </form>
@@ -198,9 +227,16 @@ export const RtiDraftingAgent = () => {
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
                   <div>
-                    <span className="text-[11px] uppercase tracking-wider font-bold text-orange-400">Target Department</span>
-                    <h4 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
-                      <Building2 className="w-4 h-4 text-emerald-400" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        rtionline.gov.in Compliant
+                      </span>
+                      <span className="text-xs font-mono text-slate-400">
+                        {generatedDraft.charCount} / 3000 Chars
+                      </span>
+                    </div>
+                    <h4 className="text-base font-bold text-white flex items-center gap-2 mt-1">
+                      <Building2 className="w-4 h-4 text-orange-400" />
                       {generatedDraft.department}
                     </h4>
                   </div>
@@ -208,36 +244,37 @@ export const RtiDraftingAgent = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleCopy}
-                      className="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition-all"
+                      className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md transition-all"
                     >
-                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copied ? 'Copied' : 'Copy Text'}
+                      {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? 'Copied!' : 'Copy for Portal'}
                     </button>
                     <button
                       onClick={() => downloadRtiPdf(generatedDraft, formData)}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all"
+                      className="px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all"
                     >
-                      <Download className="w-3.5 h-3.5" /> PDF
+                      <Download className="w-3.5 h-3.5 text-emerald-400" /> PDF
                     </button>
                   </div>
                 </div>
 
                 {/* RTI Text Content Box */}
-                <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs font-mono text-slate-200 whitespace-pre-wrap max-h-[480px] overflow-y-auto leading-relaxed shadow-inner">
-                  {generatedDraft.fullText}
+                <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs font-mono text-slate-200 whitespace-pre-wrap max-h-[440px] overflow-y-auto leading-relaxed shadow-inner">
+                  {generatedDraft.portalText}
                 </div>
               </div>
 
-              {/* Informative Submission Guide */}
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-amber-200 text-xs space-y-1">
-                <div className="font-bold flex items-center gap-1.5">
-                  <Info className="w-4 h-4 text-amber-400" /> How to Submit Your Application
+              {/* Informative rtionline.gov.in Rules Checklist */}
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs space-y-2">
+                <div className="font-bold text-orange-400 flex items-center gap-1.5">
+                  <Info className="w-4 h-4" /> Official Portal Filling Rules (rtionline.gov.in):
                 </div>
-                <p className="text-amber-300/80">
-                  1. Download PDF or print this draft.<br />
-                  2. Attach ₹10 Court Fee Stamp or Indian Postal Order (IPO) payable to PIO.<br />
-                  3. Send via Speed Post to the PIO address or submit online at <strong>rtionline.gov.in</strong>.
-                </p>
+                <ul className="text-slate-400 space-y-1 text-[11px] list-disc list-inside">
+                  <li>Paste copied text into <strong>"Text for RTI Request application"</strong> column on portal.</li>
+                  <li>Characters allowed: <code>A-Z, a-z, 0-9, and , . - _ ( ) / @ : & ? \ %</code> (Auto-sanitized above).</li>
+                  <li>If uploading attachment PDF, filename MUST be <strong>under 12 alphanumeric characters with NO spaces</strong> (e.g. <code>RTI_1234.pdf</code>).</li>
+                  <li>Do NOT upload Aadhaar Card or PAN Card (except BPL certificate if applicable).</li>
+                </ul>
               </div>
 
             </div>
@@ -249,7 +286,7 @@ export const RtiDraftingAgent = () => {
               <div>
                 <h4 className="text-base font-bold text-slate-200">No Draft Generated Yet</h4>
                 <p className="text-xs text-slate-500 max-w-sm mt-1">
-                  Fill out your query on the left form and click "Generate Section 6(1) RTI Draft" to auto-route and format your application.
+                  Select your target Ministry and type your question on the left. The agent will format a 3,000-character compliant text ready for <strong>rtionline.gov.in</strong>.
                 </p>
               </div>
             </div>
