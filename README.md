@@ -1,5 +1,4 @@
 # NyayaPath AI - Civic & Legal Empowerment Platform
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/Kusagra9308/NyayaPathAI/tree/main)
 
 NyayaPath AI is an AI-powered system designed to help citizens understand and act on their civic and legal rights, translating bureaucratic complexity into a clear, guided path. It empowers individuals by providing tools for government transparency and legal access.
 
