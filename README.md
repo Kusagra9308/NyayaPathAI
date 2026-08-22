@@ -41,7 +41,7 @@ npm run dev
 Open [http://localhost:5173/](http://localhost:5173/) in your browser.
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Framework**: React 18 + Vite
 - **Styling**: Tailwind CSS + Lucide Icons
 - **PDF Engine**: jsPDF (Client-side instant PDF generation)
