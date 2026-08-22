@@ -199,11 +199,11 @@ export const RtiDraftingAgent = () => {
                     className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold hover:bg-orange-500/20 flex items-center gap-1 transition-all"
                   >
                     <Bot className="w-3.5 h-3.5" />
-                    {showAiAssistant ? 'Hide Groq AI Chat' : '🤖 Ask Groq AI Chatbot'}
+                    {showAiAssistant ? 'Hide AI Assistant' : '🤖 Ask AI Assistant'}
                   </button>
                 </div>
 
-                {/* Groq AI Mini Chatbot Assistant */}
+                {/* AI Mini Chatbot Assistant */}
                 {showAiAssistant && (
                   <RtiChatbotAssistant onApplyDraft={handleApplyDraftFromChatbot} />
                 )}

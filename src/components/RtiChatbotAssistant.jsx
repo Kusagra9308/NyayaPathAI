@@ -7,7 +7,7 @@ const DEFAULT_MESSAGES = [
   {
     id: '1',
     sender: 'bot',
-    text: 'Namaste! I am your Groq AI Assistant 🤖 (Powered by Groq). Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
+    text: 'Namaste! I am your NyayaPath AI Assistant 🤖. Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
   }
 ];
 
@@ -57,7 +57,7 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
   }, [draftedResult]);
 
   const handleSaveKey = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     localStorage.setItem('GROQ_API_KEY', tempKey.trim());
     setGroqApiKey(tempKey.trim());
     setShowKeyModal(false);
@@ -71,7 +71,10 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
   };
 
   const handleSend = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!input.trim() || loading) return;
 
     const userText = input.trim();
@@ -83,7 +86,7 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
     try {
       const conversationHistory = [...messages, userMsg].map(m => `${m.sender === 'user' ? 'Citizen' : 'AI Assistant'}: ${m.text}`).join('\n');
       
-      const systemPrompt = `You are NyayaPath AI, an expert Indian legal assistant powered by Groq. 
+      const systemPrompt = `You are NyayaPath AI, an expert Indian legal assistant. 
 Goal: Interview the citizen to construct a precise, legally structured RTI query under Section 6(1) of RTI Act 2005.
 Guidelines:
 1. If details are missing (location, date, ref number), ask 1 short follow-up question.
@@ -106,7 +109,6 @@ Format JSON at the end if ready:
 
       let currentDraftResult = null;
 
-      // Check if AI generated ready JSON
       const jsonMatch = aiResponseText.match(/```json\s*([\s\S]*?)\s*```/) || aiResponseText.match(/\{[\s\S]*"ready"[\s\S]*\}/);
       if (jsonMatch) {
         try {
@@ -137,7 +139,7 @@ Format JSON at the end if ready:
         { id: (Date.now() + 1).toString(), sender: 'bot', text: cleanAiReply || 'I have drafted your RTI query!' }
       ]);
     } catch (err) {
-      console.error('Groq Chatbot Error:', err);
+      console.error('Chatbot Error:', err);
       
       const autoMinistry = detectMinistryForQuery(userText);
       const fallbackDraft = `What is the current official processing status, reasons for delay, and names of officers responsible regarding: "${userText}"? Please provide certified copies of all file notings.`;
@@ -160,7 +162,19 @@ Format JSON at the end if ready:
     }
   };
 
-  const handleApply = () => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSend();
+    }
+  };
+
+  const handleApply = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!draftedResult) return;
     onApplyDraft(draftedResult.queryText, draftedResult.ministry);
   };
@@ -176,9 +190,9 @@ Format JSON at the end if ready:
           </div>
           <div>
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-              Groq AI Query Assistant <Sparkles className="w-3 h-3 text-amber-400" />
+              AI Query Assistant <Sparkles className="w-3 h-3 text-amber-400" />
             </h4>
-            <p className="text-[10px] text-slate-400">Persistent Client-Side Memory (Groq LLM)</p>
+            <p className="text-[10px] text-slate-400">Powered by NyayaPath Legal Engine</p>
           </div>
         </div>
 
@@ -202,43 +216,36 @@ Format JSON at the end if ready:
             }`}
           >
             <Key className="w-3 h-3" />
-            {groqApiKey ? 'Groq Key Active ✓' : 'Add Groq Key'}
+            {groqApiKey ? 'AI Engine Active ✓' : 'AI API Key'}
           </button>
         </div>
       </div>
 
-      {/* Groq Key Drawer/Input */}
+      {/* API Key Drawer/Input */}
       {showKeyModal && (
-        <form onSubmit={handleSaveKey} className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 animate-fade-in">
+        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 animate-fade-in">
           <div className="flex justify-between items-center">
             <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-              <Key className="w-3 h-3 text-orange-400" /> Enter Custom Groq API Key (gsk_...)
+              <Key className="w-3 h-3 text-orange-400" /> Enter Custom AI API Key
             </label>
-            <a
-              href="https://console.groq.com/keys"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] text-orange-400 hover:underline"
-            >
-              Get Free Groq Key ↗
-            </a>
           </div>
           <div className="flex gap-2">
             <input
               type="password"
-              placeholder="gsk_..."
+              placeholder="API Key..."
               value={tempKey}
               onChange={(e) => setTempKey(e.target.value)}
               className="flex-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white"
             />
             <button
-              type="submit"
+              type="button"
+              onClick={handleSaveKey}
               className="px-3 py-1.5 bg-orange-500 text-white font-bold text-xs rounded-lg hover:bg-orange-600"
             >
               Save Key
             </button>
           </div>
-        </form>
+        </div>
       )}
 
       {/* Chat messages box */}
@@ -266,28 +273,30 @@ Format JSON at the end if ready:
 
         {loading && (
           <div className="flex items-center gap-2 text-xs text-orange-400 font-semibold p-2">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Groq LLM (groq/compound-mini) is thinking...
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> NyayaPath AI is thinking...
           </div>
         )}
       </div>
 
-      {/* Chat input box */}
-      <form onSubmit={handleSend} className="flex gap-2">
+      {/* Chat input container */}
+      <div className="flex gap-2">
         <input
           type="text"
           value={input}
+          onKeyDown={handleKeyDown}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask Groq AI to help draft your RTI query..."
+          placeholder="Ask AI Assistant to help draft your RTI query..."
           className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
         />
         <button
-          type="submit"
+          type="button"
+          onClick={handleSend}
           disabled={loading || !input.trim()}
           className="px-3.5 py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-xl font-bold text-xs shadow-md transition-all"
         >
           <Send className="w-3.5 h-3.5" />
         </button>
-      </form>
+      </div>
 
       {/* Apply Drafted Result Button */}
       {draftedResult && (
