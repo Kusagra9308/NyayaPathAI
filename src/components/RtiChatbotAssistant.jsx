@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { Bot, Send, User, Sparkles, Key, Check, ArrowRight, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, Send, User, Sparkles, Key, ArrowRight, Loader2, Trash2 } from 'lucide-react';
 import { callGroqAi } from '../services/groqApi';
 import { detectMinistryForQuery } from '../utils/rtiGenerator';
+
+const DEFAULT_MESSAGES = [
+  {
+    id: '1',
+    sender: 'bot',
+    text: 'Namaste! I am your Groq AI Assistant 🤖 (Powered by Groq). Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
+  }
+];
 
 export const RtiChatbotAssistant = ({ onApplyDraft }) => {
   const [groqApiKey, setGroqApiKey] = useState(
@@ -10,23 +18,56 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState(groqApiKey);
 
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      sender: 'bot',
-      text: 'Namaste! I am your Groq AI Assistant 🤖 (Powered by Groq). Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
+  // Client-side persistent chat memory
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('NYAYAPATH_GROQ_CHAT_MEMORY');
+      return saved ? JSON.parse(saved) : DEFAULT_MESSAGES;
+    } catch (e) {
+      return DEFAULT_MESSAGES;
     }
-  ]);
+  });
+
+  const [draftedResult, setDraftedResult] = useState(() => {
+    try {
+      const saved = localStorage.getItem('NYAYAPATH_GROQ_CHAT_DRAFT');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
 
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [draftedResult, setDraftedResult] = useState(null);
+
+  // Auto-save messages to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('NYAYAPATH_GROQ_CHAT_MEMORY', JSON.stringify(messages));
+    } catch (e) {}
+  }, [messages]);
+
+  // Auto-save drafted result to localStorage
+  useEffect(() => {
+    if (draftedResult) {
+      try {
+        localStorage.setItem('NYAYAPATH_GROQ_CHAT_DRAFT', JSON.stringify(draftedResult));
+      } catch (e) {}
+    }
+  }, [draftedResult]);
 
   const handleSaveKey = (e) => {
     e.preventDefault();
     localStorage.setItem('GROQ_API_KEY', tempKey.trim());
     setGroqApiKey(tempKey.trim());
     setShowKeyModal(false);
+  };
+
+  const handleClearMemory = () => {
+    localStorage.removeItem('NYAYAPATH_GROQ_CHAT_MEMORY');
+    localStorage.removeItem('NYAYAPATH_GROQ_CHAT_DRAFT');
+    setMessages(DEFAULT_MESSAGES);
+    setDraftedResult(null);
   };
 
   const handleSend = async (e) => {
@@ -40,7 +81,6 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
     setLoading(true);
 
     try {
-      // Groq API call with automatic fallback models
       const conversationHistory = [...messages, userMsg].map(m => `${m.sender === 'user' ? 'Citizen' : 'AI Assistant'}: ${m.text}`).join('\n');
       
       const systemPrompt = `You are NyayaPath AI, an expert Indian legal assistant powered by Groq. 
@@ -64,31 +104,32 @@ Format JSON at the end if ready:
         model: 'groq/compound-mini'
       });
 
+      let currentDraftResult = null;
+
       // Check if AI generated ready JSON
       const jsonMatch = aiResponseText.match(/```json\s*([\s\S]*?)\s*```/) || aiResponseText.match(/\{[\s\S]*"ready"[\s\S]*\}/);
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
           if (parsed.ready && parsed.draftQuery) {
-            setDraftedResult({
+            currentDraftResult = {
               queryText: parsed.draftQuery,
               ministry: parsed.detectedMinistry || detectMinistryForQuery(parsed.draftQuery)
-            });
+            };
+            setDraftedResult(currentDraftResult);
           }
-        } catch (e) {
-          // Fallback parsing if JSON has minor syntax variance
-        }
+        } catch (e) {}
       }
 
       const cleanAiReply = aiResponseText.replace(/```json[\s\S]*?```/g, '').trim();
 
-      // If text response wasn't accompanied by JSON yet, generate auto draft result
-      if (!draftedResult) {
+      if (!currentDraftResult && !draftedResult) {
         const autoMinistry = detectMinistryForQuery(userText);
-        setDraftedResult({
+        currentDraftResult = {
           queryText: `What is the current official processing status, reasons for delay, and names of officers responsible regarding: "${userText}"? Please provide certified copies of all file notings.`,
           ministry: autoMinistry
-        });
+        };
+        setDraftedResult(currentDraftResult);
       }
 
       setMessages(prev => [
@@ -98,7 +139,6 @@ Format JSON at the end if ready:
     } catch (err) {
       console.error('Groq Chatbot Error:', err);
       
-      // Smart fallback response
       const autoMinistry = detectMinistryForQuery(userText);
       const fallbackDraft = `What is the current official processing status, reasons for delay, and names of officers responsible regarding: "${userText}"? Please provide certified copies of all file notings.`;
       
@@ -138,22 +178,33 @@ Format JSON at the end if ready:
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
               Groq AI Query Assistant <Sparkles className="w-3 h-3 text-amber-400" />
             </h4>
-            <p className="text-[10px] text-slate-400">Powered by Groq LLM (groq/compound-mini)</p>
+            <p className="text-[10px] text-slate-400">Persistent Client-Side Memory (Groq LLM)</p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowKeyModal(!showKeyModal)}
-          className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold flex items-center gap-1 transition-all ${
-            groqApiKey
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Key className="w-3 h-3" />
-          {groqApiKey ? 'Groq Key Active ✓' : 'Add Groq Key'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleClearMemory}
+            title="Clear Chat Memory"
+            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 transition-all text-xs"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowKeyModal(!showKeyModal)}
+            className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold flex items-center gap-1 transition-all ${
+              groqApiKey
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Key className="w-3 h-3" />
+            {groqApiKey ? 'Groq Key Active ✓' : 'Add Groq Key'}
+          </button>
+        </div>
       </div>
 
       {/* Groq Key Drawer/Input */}
@@ -191,7 +242,7 @@ Format JSON at the end if ready:
       )}
 
       {/* Chat messages box */}
-      <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-48 overflow-y-auto space-y-2.5">
+      <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-56 overflow-y-auto space-y-2.5">
         {messages.map((m) => (
           <div
             key={m.id}
