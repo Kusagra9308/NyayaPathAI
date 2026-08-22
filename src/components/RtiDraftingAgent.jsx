@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FileText, Sparkles, Download, Copy, Check, Info, Building2, HelpCircle, ShieldCheck, ExternalLink } from 'lucide-react';
+import { FileText, Sparkles, Download, Copy, Check, Info, Building2, HelpCircle, ShieldCheck, ExternalLink, Bot } from 'lucide-react';
 import { generateRtiDraft, downloadRtiPdf, OFFICIAL_MINISTRIES, detectMinistryForQuery } from '../utils/rtiGenerator';
+import { RtiChatbotAssistant } from './RtiChatbotAssistant';
 
 export const RtiDraftingAgent = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export const RtiDraftingAgent = () => {
     bplCardNo: ''
   });
 
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [generatedDraft, setGeneratedDraft] = useState(null);
   const [copied, setCopied] = useState(false);
 
@@ -41,6 +43,14 @@ export const RtiDraftingAgent = () => {
       ...prev,
       queryText: sample.text,
       selectedMinistry: sample.ministry
+    }));
+  };
+
+  const handleApplyDraftFromChatbot = (queryText, ministry) => {
+    setFormData(prev => ({
+      ...prev,
+      queryText: queryText,
+      selectedMinistry: ministry || detectMinistryForQuery(queryText)
     }));
   };
 
@@ -179,19 +189,32 @@ export const RtiDraftingAgent = () => {
                 />
               </div>
 
-              {/* Plain Language Query Input */}
-              <div className="space-y-1.5">
+              {/* Plain Language Query Input Header */}
+              <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-slate-300">What information do you want to ask? *</label>
-                  <span className="text-[11px] text-orange-400 font-mono">Max 3,000 chars</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAiAssistant(!showAiAssistant)}
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold hover:bg-orange-500/20 flex items-center gap-1 transition-all"
+                  >
+                    <Bot className="w-3.5 h-3.5" />
+                    {showAiAssistant ? 'Hide Groq AI Chat' : '🤖 Ask Groq AI Chatbot'}
+                  </button>
                 </div>
+
+                {/* Groq AI Mini Chatbot Assistant */}
+                {showAiAssistant && (
+                  <RtiChatbotAssistant onApplyDraft={handleApplyDraftFromChatbot} />
+                )}
+
                 <textarea
                   rows={4}
                   required
                   placeholder="Describe your issue in simple words. E.g., What is the current processing status of my Ration Card application?"
                   value={formData.queryText}
                   onChange={(e) => handleQueryChange(e.target.value)}
-                  className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+                  className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 font-sans"
                 />
               </div>
 
