@@ -1,39 +1,52 @@
-export async function callGroqAi({ apiKey, prompt, systemPrompt, model = 'llama-3.3-70b-versatile' }) {
+export async function callGroqAi({ apiKey, prompt, systemPrompt, model = 'groq/compound-mini' }) {
   const key = apiKey || localStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
   if (!key) {
     throw new Error('Groq API Key missing. Please enter your Groq API Key.');
   }
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt || 'You are NyayaPath AI, an expert Indian legal and RTI assistant. Help citizens draft precise, legally sound RTI queries under Section 6(1) of the RTI Act 2005.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 1000
-    })
-  });
+  const candidateModels = [model, 'groq/compound-mini', 'groq/compound', 'qwen/qwen3.6-27b', 'openai/gpt-oss-20b'];
+  const uniqueModels = [...new Set(candidateModels)];
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Groq API Error (${res.status}): ${errText}`);
+  let lastError = null;
+
+  for (const m of uniqueModels) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: m,
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt || 'You are NyayaPath AI, an expert Indian legal and RTI assistant. Help citizens draft precise, legally sound RTI queries under Section 6(1) of the RTI Act 2005.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1000
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return data?.choices?.[0]?.message?.content || '';
+      }
+
+      const errText = await res.text();
+      lastError = new Error(`Groq API (${m}): ${errText}`);
+    } catch (err) {
+      lastError = err;
+    }
   }
 
-  const data = await res.json();
-  return data?.choices?.[0]?.message?.content || '';
+  throw lastError || new Error('Groq API requests failed across all candidate models.');
 }
 
 export async function detectMinistryWithGroq(queryText, apiKey) {
@@ -68,7 +81,8 @@ Return ONLY the single ministry string, nothing else.`;
     const ministryStr = await callGroqAi({
       apiKey,
       prompt: `Query: "${queryText}"`,
-      systemPrompt
+      systemPrompt,
+      model: 'groq/compound-mini'
     });
     return ministryStr.trim();
   } catch (err) {
