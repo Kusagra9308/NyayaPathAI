@@ -1,7 +1,7 @@
 export async function callGroqAi({ apiKey, prompt, systemPrompt, model = 'llama-3.3-70b-versatile' }) {
-  const key = apiKey || import.meta.env.VITE_GROQ_API_KEY;
+  const key = apiKey || localStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY;
   if (!key) {
-    throw new Error('Groq API Key missing. Please provide your Groq API Key.');
+    throw new Error('Groq API Key missing. Please enter your Groq API Key.');
   }
 
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {

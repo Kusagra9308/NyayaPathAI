@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Bot, Send, User, Sparkles, Key, Check, ArrowRight, RefreshCw, Loader2 } from 'lucide-react';
-import { callGroqAi, detectMinistryWithGroq } from '../services/groqApi';
+import { callGroqAi } from '../services/groqApi';
 import { detectMinistryForQuery } from '../utils/rtiGenerator';
 
 export const RtiChatbotAssistant = ({ onApplyDraft }) => {
-  const [groqApiKey, setGroqApiKey] = useState(localStorage.getItem('GROQ_API_KEY') || '');
+  const [groqApiKey, setGroqApiKey] = useState(
+    localStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY || ''
+  );
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [tempKey, setTempKey] = useState(groqApiKey);
 
@@ -12,7 +14,7 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
     {
       id: '1',
       sender: 'bot',
-      text: 'Namaste! I am your Groq AI Assistant 🤖. Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
+      text: 'Namaste! I am your Groq AI Assistant 🤖 (llama-3.3-70b-versatile). Tell me your civic problem in plain words (e.g., "Ration card delayed", "Road repair incomplete", "PF money not credited"). I will ask you 1-2 quick questions and draft the exact RTI query & match the Ministry for you!'
     }
   ]);
 
@@ -38,11 +40,10 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
     setLoading(true);
 
     try {
-      if (groqApiKey) {
-        // Groq API call using llama-3.3-70b-versatile
-        const conversationHistory = [...messages, userMsg].map(m => `${m.sender === 'user' ? 'Citizen' : 'AI Assistant'}: ${m.text}`).join('\n');
-        
-        const systemPrompt = `You are NyayaPath AI, an expert Indian legal assistant powered by Groq. 
+      // Groq API call using llama-3.3-70b-versatile
+      const conversationHistory = [...messages, userMsg].map(m => `${m.sender === 'user' ? 'Citizen' : 'AI Assistant'}: ${m.text}`).join('\n');
+      
+      const systemPrompt = `You are NyayaPath AI, an expert Indian legal assistant powered by Groq (llama-3.3-70b-versatile). 
 Goal: Interview the citizen to construct a precise, legally structured RTI query under Section 6(1) of RTI Act 2005.
 Guidelines:
 1. If details are missing (location, date, ref number), ask 1 short follow-up question.
@@ -56,60 +57,41 @@ Format JSON at the end if ready:
 }
 \`\`\``;
 
-        const aiResponseText = await callGroqAi({
-          apiKey: groqApiKey,
-          prompt: conversationHistory,
-          systemPrompt
-        });
+      const aiResponseText = await callGroqAi({
+        apiKey: groqApiKey,
+        prompt: conversationHistory,
+        systemPrompt
+      });
 
-        // Check if AI generated ready JSON
-        const jsonMatch = aiResponseText.match(/```json\s*([\s\S]*?)\s*```/) || aiResponseText.match(/\{[\s\S]*"ready"[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-            if (parsed.ready && parsed.draftQuery) {
-              setDraftedResult({
-                queryText: parsed.draftQuery,
-                ministry: parsed.detectedMinistry || detectMinistryForQuery(parsed.draftQuery)
-              });
-            }
-          } catch (e) {
-            // Ignore JSON parse error
+      // Check if AI generated ready JSON
+      const jsonMatch = aiResponseText.match(/```json\s*([\s\S]*?)\s*```/) || aiResponseText.match(/\{[\s\S]*"ready"[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+          if (parsed.ready && parsed.draftQuery) {
+            setDraftedResult({
+              queryText: parsed.draftQuery,
+              ministry: parsed.detectedMinistry || detectMinistryForQuery(parsed.draftQuery)
+            });
           }
+        } catch (e) {
+          // Ignore JSON parse error
         }
-
-        const cleanAiReply = aiResponseText.replace(/```json[\s\S]*?```/g, '').trim();
-
-        setMessages(prev => [
-          ...prev,
-          { id: (Date.now() + 1).toString(), sender: 'bot', text: cleanAiReply || 'Here is your drafted RTI query!' }
-        ]);
-      } else {
-        // Local NLP fallback if no Groq Key entered yet
-        const autoMinistry = detectMinistryForQuery(userText);
-        const refinedDraft = `What is the official status and reason for delay regarding ${userText}? Please provide certified file notings, inspection records, and names of officers responsible.`;
-
-        setDraftedResult({
-          queryText: refinedDraft,
-          ministry: autoMinistry
-        });
-
-        setMessages(prev => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            sender: 'bot',
-            text: `I have analyzed your query! Auto-Matched Ministry: "${autoMinistry}". Click "Apply to Form" below to populate your RTI application.`
-          }
-        ]);
       }
+
+      const cleanAiReply = aiResponseText.replace(/```json[\s\S]*?```/g, '').trim();
+
+      setMessages(prev => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), sender: 'bot', text: cleanAiReply || 'Here is your drafted RTI query!' }
+      ]);
     } catch (err) {
       setMessages(prev => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
-          text: `⚠️ Groq API Note: ${err.message || 'Unable to connect to Groq'}. You can enter your Groq API Key above or use local mode.`
+          text: `⚠️ Groq API Note: ${err.message || 'Unable to connect to Groq'}.`
         }
       ]);
     } finally {
@@ -158,7 +140,7 @@ Format JSON at the end if ready:
         <form onSubmit={handleSaveKey} className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 animate-fade-in">
           <div className="flex justify-between items-center">
             <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-              <Key className="w-3 h-3 text-orange-400" /> Enter Groq API Key (gsk_...)
+              <Key className="w-3 h-3 text-orange-400" /> Enter Custom Groq API Key (gsk_...)
             </label>
             <a
               href="https://console.groq.com/keys"
@@ -212,7 +194,7 @@ Format JSON at the end if ready:
 
         {loading && (
           <div className="flex items-center gap-2 text-xs text-orange-400 font-semibold p-2">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Groq LLM is thinking...
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Groq LLM (llama-3.3-70b-versatile) is thinking...
           </div>
         )}
       </div>
