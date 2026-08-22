@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Sparkles, Download, Copy, Check, Info, Building2, HelpCircle, ShieldCheck, ExternalLink } from 'lucide-react';
-import { generateRtiDraft, downloadRtiPdf, OFFICIAL_MINISTRIES } from '../utils/rtiGenerator';
+import { generateRtiDraft, downloadRtiPdf, OFFICIAL_MINISTRIES, detectMinistryForQuery } from '../utils/rtiGenerator';
 
 export const RtiDraftingAgent = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +10,7 @@ export const RtiDraftingAgent = () => {
     email: '',
     state: 'Delhi (NCT)',
     city: 'New Delhi',
-    selectedMinistry: 'Ministry of Housing & Urban Affairs',
+    selectedMinistry: 'Department of Food & Public Distribution',
     queryText: '',
     specificDetails: '',
     bplStatus: false,
@@ -21,11 +21,28 @@ export const RtiDraftingAgent = () => {
   const [copied, setCopied] = useState(false);
 
   const sampleQueries = [
-    'Why is the road repair in Ward 12 delayed for 8 months?',
-    'What is the current processing status of my Ration Card application?',
-    'Provide certified water quality test reports for my locality over last 3 months',
-    'Details of funds allocated and spent on street light maintenance in my area'
+    { text: 'What is the current processing status of my Ration Card application?', ministry: 'Department of Food & Public Distribution' },
+    { text: 'Why is the road repair in Ward 12 delayed for 8 months?', ministry: 'Ministry of Road Transport & Highways' },
+    { text: 'Provide certified water quality test reports for my locality over last 3 months', ministry: 'Ministry of Housing & Urban Affairs' },
+    { text: 'Details of EPF disbursement and pension delay for my PF Account', ministry: 'Ministry of Labour & Employment' }
   ];
+
+  const handleQueryChange = (text) => {
+    const autoMinistry = detectMinistryForQuery(text);
+    setFormData(prev => ({
+      ...prev,
+      queryText: text,
+      selectedMinistry: autoMinistry
+    }));
+  };
+
+  const handleSelectSample = (sample) => {
+    setFormData(prev => ({
+      ...prev,
+      queryText: sample.text,
+      selectedMinistry: sample.ministry
+    }));
+  };
 
   const handleGenerate = (e) => {
     e.preventDefault();
@@ -55,7 +72,7 @@ export const RtiDraftingAgent = () => {
             Right to Information (RTI) Drafting Agent
           </h2>
           <p className="text-slate-300 text-sm leading-relaxed">
-            Formats your plain-language query into the exact 3,000-character, regex-compliant format required by the <strong>rtionline.gov.in</strong> portal (DoPT, Govt of India).
+            Formats your plain-language query into the exact 3,000-character, section-formatted text required by the <strong>rtionline.gov.in</strong> portal (DoPT, Govt of India).
           </p>
         </div>
       </div>
@@ -85,9 +102,12 @@ export const RtiDraftingAgent = () => {
               
               {/* Ministry / Public Authority Select */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-orange-400" /> Select Ministry / Department / Public Authority *
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                    <Building2 className="w-3.5 h-3.5 text-orange-400" /> Ministry / Public Authority *
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-semibold">Auto-Matched</span>
+                </div>
                 <select
                   value={formData.selectedMinistry}
                   onChange={(e) => setFormData({ ...formData, selectedMinistry: e.target.value })}
@@ -106,7 +126,7 @@ export const RtiDraftingAgent = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Ramesh Kumar"
+                    placeholder="e.g. Kushagra Chauhan"
                     value={formData.applicantName}
                     onChange={(e) => setFormData({ ...formData, applicantName: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500"
@@ -140,7 +160,7 @@ export const RtiDraftingAgent = () => {
                   <label className="text-xs font-bold text-slate-300">District / City</label>
                   <input
                     type="text"
-                    placeholder="e.g. Mumbai"
+                    placeholder="e.g. Bhusawal"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500"
@@ -152,7 +172,7 @@ export const RtiDraftingAgent = () => {
                 <label className="text-xs font-bold text-slate-300">Address for Correspondence</label>
                 <input
                   type="text"
-                  placeholder="e.g. Flat 402, Green Enclave, Sector 12"
+                  placeholder="e.g. D-308, Mission Road, Krishna Colony"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-orange-500"
@@ -168,9 +188,9 @@ export const RtiDraftingAgent = () => {
                 <textarea
                   rows={4}
                   required
-                  placeholder="Describe your issue in simple words. E.g., The road construction near Ward 12 has been incomplete for 8 months. I want to know contractor name, budget sanctioned, and reason for delay."
+                  placeholder="Describe your issue in simple words. E.g., What is the current processing status of my Ration Card application?"
                   value={formData.queryText}
-                  onChange={(e) => setFormData({ ...formData, queryText: e.target.value })}
+                  onChange={(e) => handleQueryChange(e.target.value)}
                   className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
                 />
               </div>
@@ -185,10 +205,10 @@ export const RtiDraftingAgent = () => {
                     <button
                       key={i}
                       type="button"
-                      onClick={() => setFormData({ ...formData, queryText: sample })}
+                      onClick={() => handleSelectSample(sample)}
                       className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-all text-left"
                     >
-                      {sample}
+                      {sample.text}
                     </button>
                   ))}
                 </div>
@@ -258,7 +278,7 @@ export const RtiDraftingAgent = () => {
                   </div>
                 </div>
 
-                {/* RTI Text Content Box */}
+                {/* Clean Section-Formatted RTI Text Content Box */}
                 <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs font-mono text-slate-200 whitespace-pre-wrap max-h-[440px] overflow-y-auto leading-relaxed shadow-inner">
                   {generatedDraft.portalText}
                 </div>
