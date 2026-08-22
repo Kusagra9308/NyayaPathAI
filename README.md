@@ -3,8 +3,6 @@
 **Theme**: Civic Tech, Legal Access and Government Transparency  
 **Challenge Statement**: Build an AI system that helps a citizen understand and act on their civic or legal rights, translating bureaucratic complexity into a clear, guided path.
 
----
-
 ## Key Modules
 
 ### 1.  RTI (Right to Information) Drafting Agent
@@ -26,9 +24,8 @@
 - **Interactive Interviewer**: Guides citizens through a friendly Q&A flow.
 - **Auto-Populates CPGRAMS Form**: Generates official complaint text for `pgportal.gov.in`.
 
----
 
-## 🚀 Quick Start Instructions
+## Quick Start Instructions
 
 ### 1. Install Dependencies
 ```bash
@@ -43,7 +40,6 @@ npm run dev
 
 Open [http://localhost:5173/](http://localhost:5173/) in your browser.
 
----
 
 ## 🛠️ Tech Stack
 - **Framework**: React 18 + Vite
