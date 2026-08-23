@@ -6,7 +6,6 @@ import jsPDF from 'jspdf';
 export const RightsNavigator = () => {
   const [selectedCatId, setSelectedCatId] = useState('tenant');
   
-  // Interactive Studio Control Sliders & Toggles
   const [disputeAmount, setDisputeAmount] = useState(25000);
   const [delayMonths, setDelayMonths] = useState(2);
   const [hasWrittenProof, setHasWrittenProof] = useState(true);
@@ -20,7 +19,7 @@ export const RightsNavigator = () => {
 
   const activeCategory = DISPUTE_CATEGORIES.find(c => c.id === selectedCatId) || DISPUTE_CATEGORIES[0];
 
-  // Calculate Case Strength Score based on evidence
+  // calculate strength of the case 
   const calculateCaseStrength = () => {
     let score = 50;
     if (hasWrittenProof) score += 35;
@@ -31,7 +30,7 @@ export const RightsNavigator = () => {
 
   const caseStrength = calculateCaseStrength();
 
-  // Generate legal notice draft
+  // generate notice
   const generatedNotice = generateLegalNoticeText(
     selectedCatId,
     senderName,
@@ -67,7 +66,7 @@ export const RightsNavigator = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       
-      {/* Intro Header */}
+      // header
       <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="max-w-3xl space-y-2 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
@@ -82,7 +81,7 @@ export const RightsNavigator = () => {
         </div>
       </div>
 
-      {/* Visual Category Selector Cards */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {DISPUTE_CATEGORIES.map((cat) => {
           const isSelected = selectedCatId === cat.id;
@@ -116,10 +115,9 @@ export const RightsNavigator = () => {
         })}
       </div>
 
-      {/* Main Studio Grid: Left Control Panel + Right Live Legal Dossier */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Interactive Parameters Studio */}
+      
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
             
@@ -130,10 +128,9 @@ export const RightsNavigator = () => {
               <p className="text-xs text-slate-400 mt-0.5">Adjust sliders to evaluate your legal strength</p>
             </div>
 
-            {/* Parameter Sliders */}
+           
             <div className="space-y-4">
-              
-              {/* Claim Amount Slider */}
+        
               <div className="space-y-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-300">Dispute / Claim Amount</span>
@@ -150,7 +147,7 @@ export const RightsNavigator = () => {
                 />
               </div>
 
-              {/* Delay Duration Slider */}
+              
               <div className="space-y-1.5 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-300">Delay / Non-Resolution Duration</span>
@@ -167,7 +164,7 @@ export const RightsNavigator = () => {
                 />
               </div>
 
-              {/* Evidence Checkbox Toggles */}
+              
               <div className="space-y-2 pt-1">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Evidence Availability:</span>
                 
@@ -192,7 +189,7 @@ export const RightsNavigator = () => {
                 </label>
               </div>
 
-              {/* Parties Details */}
+              
               <div className="space-y-2 pt-2 border-t border-slate-800">
                 <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Opposite Party Info (For Notice):</span>
                 <input
@@ -216,14 +213,14 @@ export const RightsNavigator = () => {
           </div>
         </div>
 
-        {/* Right Column: Live Auto-Updating Legal Dossier Canvas */}
+        
         <div className="lg:col-span-7 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             
-            {/* Case Strength Gauge & Navigation Subtabs */}
+            
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
               
-              {/* Case Strength Gauge */}
+             
               <div className="flex items-center gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 <div className="relative w-14 h-14 flex items-center justify-center">
                   <svg className="w-14 h-14 transform -rotate-90">
@@ -271,11 +268,11 @@ export const RightsNavigator = () => {
 
             </div>
 
-            {/* SUBTAB 1: Scraped Legal Rights & Roadmap */}
+           
             {activeSubTab === 'dossier' && (
               <div className="space-y-6 animate-fade-in">
                 
-                {/* Scraped Statutory Law Excerpt */}
+              
                 <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-orange-400 uppercase tracking-wider flex items-center gap-1">
@@ -311,7 +308,7 @@ export const RightsNavigator = () => {
                   </div>
                 </div>
 
-                {/* Direct Official Portal Button */}
+                
                 <div className="pt-2 border-t border-slate-800">
                   <a
                     href={activeCategory.officialPortalUrl}
@@ -327,7 +324,7 @@ export const RightsNavigator = () => {
               </div>
             )}
 
-            {/* SUBTAB 2: Generated Legal Demand Notice */}
+      
             {activeSubTab === 'notice' && (
               <div className="space-y-4 animate-fade-in">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">

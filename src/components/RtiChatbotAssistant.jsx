@@ -12,7 +12,7 @@ const DEFAULT_MESSAGES = [
 ];
 
 export const RtiChatbotAssistant = ({ onApplyDraft }) => {
-  // Client-side persistent chat memory
+ // save local chat history
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem('NYAYAPATH_GROQ_CHAT_MEMORY');
@@ -34,14 +34,14 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Auto-save messages to localStorage
+  // save message to local storage
   useEffect(() => {
     try {
       localStorage.setItem('NYAYAPATH_GROQ_CHAT_MEMORY', JSON.stringify(messages));
     } catch (e) {}
   }, [messages]);
 
-  // Auto-save drafted result to localStorage
+  
   useEffect(() => {
     if (draftedResult) {
       try {
@@ -168,7 +168,7 @@ Format JSON at the end if ready:
   return (
     <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
       
-      {/* Header bar */}
+    
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center">
@@ -193,7 +193,7 @@ Format JSON at the end if ready:
         </button>
       </div>
 
-      {/* Chat messages box */}
+     
       <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-56 overflow-y-auto space-y-2.5">
         {messages.map((m) => (
           <div
@@ -223,7 +223,7 @@ Format JSON at the end if ready:
         )}
       </div>
 
-      {/* Chat input container */}
+     
       <div className="flex gap-2">
         <input
           type="text"
@@ -243,7 +243,7 @@ Format JSON at the end if ready:
         </button>
       </div>
 
-      {/* Apply Drafted Result Button */}
+     
       {draftedResult && (
         <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between bg-emerald-500/5 p-2.5 rounded-xl border border-emerald-500/20">
           <div className="space-y-0.5">

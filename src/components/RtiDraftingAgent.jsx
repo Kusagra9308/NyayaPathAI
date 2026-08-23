@@ -89,7 +89,7 @@ export const RtiDraftingAgent = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Input Form Column */}
+         // form column
         <div className="lg:col-span-6 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
             
@@ -110,7 +110,7 @@ export const RtiDraftingAgent = () => {
 
             <form onSubmit={handleGenerate} className="space-y-4">
               
-              {/* Ministry / Public Authority Select */}
+            // select ministry
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
@@ -129,7 +129,7 @@ export const RtiDraftingAgent = () => {
                 </select>
               </div>
 
-              {/* Applicant Name & Phone */}
+              // applicant name and phone no 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Applicant Full Name *</label>
@@ -203,7 +203,7 @@ export const RtiDraftingAgent = () => {
                   </button>
                 </div>
 
-                {/* AI Mini Chatbot Assistant */}
+               // ai mini assistant 
                 {showAiAssistant && (
                   <RtiChatbotAssistant onApplyDraft={handleApplyDraftFromChatbot} />
                 )}
@@ -218,7 +218,7 @@ export const RtiDraftingAgent = () => {
                 />
               </div>
 
-              {/* Sample Prompts */}
+              // sample prompts
               <div className="space-y-1.5">
                 <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1">
                   <HelpCircle className="w-3 h-3 text-orange-400" /> Try example questions:
@@ -237,7 +237,7 @@ export const RtiDraftingAgent = () => {
                 </div>
               </div>
 
-              {/* BPL Exemption Checkbox */}
+              // bpl exception checkbox
               <div className="pt-2 flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -262,7 +262,7 @@ export const RtiDraftingAgent = () => {
           </div>
         </div>
 
-        {/* Generated Draft Output Column */}
+    // generated draft column 
         <div className="lg:col-span-6 space-y-6">
           {generatedDraft ? (
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col h-full justify-between">
@@ -301,13 +301,13 @@ export const RtiDraftingAgent = () => {
                   </div>
                 </div>
 
-                {/* Clean Section-Formatted RTI Text Content Box */}
+                // generate button
                 <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 text-xs font-mono text-slate-200 whitespace-pre-wrap max-h-[440px] overflow-y-auto leading-relaxed shadow-inner">
                   {generatedDraft.portalText}
                 </div>
               </div>
 
-              {/* Informative rtionline.gov.in Rules Checklist */}
+             // extra information
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-xs space-y-2">
                 <div className="font-bold text-orange-400 flex items-center gap-1.5">
                   <Info className="w-4 h-4" /> Official Portal Filling Rules (rtionline.gov.in):
