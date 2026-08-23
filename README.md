@@ -4,7 +4,7 @@ NyayaPath AI is an advanced AI-powered civic technology platform designed to hel
 
 ---
 
-## 🏛️ System Architecture
+##  System Architecture
 
 ```mermaid
 graph TD
@@ -94,7 +94,7 @@ civic-rights-ai/
 
 ---
 
-## 🌟 Key Modules & Capabilities
+##  Key Modules & Capabilities
 
 ### 1. RTI (Right to Information) Drafting Agent (`rtionline.gov.in`)
 - **Strict Portal Compliance**: Sanitizes query text to adhere strictly to the 3,000-character limit and allowed character set (`A-Z, a-z, 0-9, , . - _ ( ) / @ : & ? \ %`) enforced by DoPT on `rtionline.gov.in`.
@@ -167,6 +167,6 @@ Open [http://localhost:5173](http://localhost:5173) (or `http://localhost:5174`)
 
 ---
 
-## 📜 License
+##  License
 
 Distributed under the MIT License. See `LICENSE` for more information.
