@@ -10,21 +10,21 @@ import { GrievanceFormFiller } from './components/GrievanceFormFiller';
 import { ShieldCheck, ExternalLink, ArrowLeft } from 'lucide-react';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('hub'); // 'hub' | 'rti' | 'rights' | 'legal_aid' | 'consumer_court' | 'schemes' | 'grievance'
+  const [activeTab, setActiveTab] = useState('hub');
 
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-100 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
       
-      {/* Top Navbar */}
+      
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      {/* Main Workspace */}
+     
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        {/* Navigation Breadcrumb bar when inside a specific service */}
+       
         {activeTab !== 'hub' && (
           <div className="mb-6 flex items-center justify-between bg-slate-900/60 border border-slate-800/80 p-3 rounded-2xl">
             <button
@@ -50,7 +50,7 @@ export function App() {
         {activeTab === 'grievance' && <GrievanceFormFiller />}
       </main>
 
-      {/* Footer */}
+      
       <footer className="border-t border-slate-800 bg-[#0F172A] py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bot, Send, User, Sparkles, Key, ArrowRight, Loader2, Trash2 } from 'lucide-react';
+import { Bot, Send, User, Sparkles, ArrowRight, Loader2, Trash2 } from 'lucide-react';
 import { callGroqAi } from '../services/groqApi';
 import { detectMinistryForQuery } from '../utils/rtiGenerator';
 
@@ -12,12 +12,6 @@ const DEFAULT_MESSAGES = [
 ];
 
 export const RtiChatbotAssistant = ({ onApplyDraft }) => {
-  const [groqApiKey, setGroqApiKey] = useState(
-    localStorage.getItem('GROQ_API_KEY') || import.meta.env.VITE_GROQ_API_KEY || ''
-  );
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [tempKey, setTempKey] = useState(groqApiKey);
-
   // Client-side persistent chat memory
   const [messages, setMessages] = useState(() => {
     try {
@@ -55,13 +49,6 @@ export const RtiChatbotAssistant = ({ onApplyDraft }) => {
       } catch (e) {}
     }
   }, [draftedResult]);
-
-  const handleSaveKey = (e) => {
-    if (e) e.preventDefault();
-    localStorage.setItem('GROQ_API_KEY', tempKey.trim());
-    setGroqApiKey(tempKey.trim());
-    setShowKeyModal(false);
-  };
 
   const handleClearMemory = () => {
     localStorage.removeItem('NYAYAPATH_GROQ_CHAT_MEMORY');
@@ -101,7 +88,6 @@ Format JSON at the end if ready:
 \`\`\``;
 
       const aiResponseText = await callGroqAi({
-        apiKey: groqApiKey,
         prompt: conversationHistory,
         systemPrompt,
         model: 'groq/compound-mini'
@@ -196,57 +182,16 @@ Format JSON at the end if ready:
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleClearMemory}
-            title="Clear Chat Memory"
-            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 transition-all text-xs"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowKeyModal(!showKeyModal)}
-            className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold flex items-center gap-1 transition-all ${
-              groqApiKey
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Key className="w-3 h-3" />
-            {groqApiKey ? 'AI Engine Active ✓' : 'AI API Key'}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleClearMemory}
+          title="Clear Chat Memory"
+          className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 transition-all text-xs flex items-center gap-1"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-semibold hidden sm:inline">Reset Chat</span>
+        </button>
       </div>
-
-      {/* API Key Drawer/Input */}
-      {showKeyModal && (
-        <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-2 animate-fade-in">
-          <div className="flex justify-between items-center">
-            <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-              <Key className="w-3 h-3 text-orange-400" /> Enter Custom AI API Key
-            </label>
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              placeholder="API Key..."
-              value={tempKey}
-              onChange={(e) => setTempKey(e.target.value)}
-              className="flex-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white"
-            />
-            <button
-              type="button"
-              onClick={handleSaveKey}
-              className="px-3 py-1.5 bg-orange-500 text-white font-bold text-xs rounded-lg hover:bg-orange-600"
-            >
-              Save Key
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Chat messages box */}
       <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 max-h-56 overflow-y-auto space-y-2.5">
