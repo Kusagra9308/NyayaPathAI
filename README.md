@@ -125,7 +125,7 @@ civic-rights-ai/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React 18 + Vite
 - **Styling**: Tailwind CSS + Lucide React Icons
@@ -135,7 +135,7 @@ civic-rights-ai/
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Clone the repository
 ```bash
