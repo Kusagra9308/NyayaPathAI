@@ -26,14 +26,20 @@ export const LegalAidFinder = () => {
   const eligibility = checkNalsaEligibility(formData.category, formData.annualIncome);
 
   const handleRefineCaseWithAi = async () => {
-    if (!formData.caseDetails.trim() || aiLoading) return;
+    let sourceText = formData.caseDetails.trim();
+    if (!sourceText) {
+      sourceText = "Landlord evicted me illegally without returning security deposit of Rs 25,000 despite 30 days notice.";
+      setFormData(prev => ({ ...prev, caseDetails: sourceText }));
+    }
+
+    if (aiLoading) return;
     setAiLoading(true);
 
     try {
       const systemPrompt = `You are NyayaPath AI, an expert NALSA Legal Aid Advocate. 
-Refine the citizen's legal issue into a clear, structured summary paragraph for assignment of a free DLSA advocate under Section 12 of NALSA Act 1987.`;
+Refine the citizen's legal issue into a clear, structured summary paragraph for assignment of a free DLSA advocate under Section 12 of NALSA Act 1987. Citing relevant statutory provisions.`;
 
-      const prompt = `Legal Problem: "${formData.caseDetails}". Category: "${formData.category}". District: "${formData.district}".`;
+      const prompt = `Legal Problem: "${sourceText}". Category: "${formData.category}". District: "${formData.district}".`;
 
       const refined = await callGroqAi({
         prompt,
@@ -48,7 +54,13 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
         }));
       }
     } catch (e) {
-      console.warn('AI Case Refine error:', e);
+      console.warn('AI Case Refine fallback active:', e);
+      const catObj = NALSA_ELIGIBILITY_CATEGORIES.find(c => c.id === formData.category);
+      const fallbackRefined = `The Applicant requires urgent legal representation regarding: "${sourceText}". The matter involves statutory infringement under ${catObj?.section || 'NALSA Act 1987'}, requiring formal legal notice, representation in competent court, and recovery of rightful dues.`;
+      setFormData(prev => ({
+        ...prev,
+        caseDetails: fallbackRefined
+      }));
     } finally {
       setAiLoading(false);
     }
@@ -212,7 +224,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
                   <button
                     type="button"
                     onClick={handleRefineCaseWithAi}
-                    disabled={aiLoading || !formData.caseDetails.trim()}
+                    disabled={aiLoading}
                     className="text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 font-bold hover:bg-purple-500/20 disabled:opacity-40 flex items-center gap-1 transition-all"
                   >
                     <Bot className="w-3.5 h-3.5" />

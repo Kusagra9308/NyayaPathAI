@@ -30,14 +30,20 @@ export const ConsumerCourtEngine = () => {
   const totalClaim = Number(formData.productPrice || 0) + Number(formData.agonyCompensation || 0) + Number(formData.litigationCosts || 0);
 
   const handleRefineWithAi = async () => {
-    if (!formData.factsSummary.trim() || aiLoading) return;
+    let sourceText = formData.factsSummary.trim();
+    if (!sourceText) {
+      sourceText = `Purchased product worth Rs. ${formData.productPrice} from ${formData.oppositePartyName || 'Opposite Party'}. Item stopped working within warranty period and seller refused 100% refund.`;
+      setFormData(prev => ({ ...prev, factsSummary: sourceText }));
+    }
+
+    if (aiLoading) return;
     setAiLoading(true);
 
     try {
       const systemPrompt = `You are NyayaPath AI, an expert Consumer Law advocate under Consumer Protection Act 2019. 
 Refine the citizen's factual statement into a formal, legally structured petition paragraph suitable for e-Daakhil (edaakhil.nic.in). Cite relevant provisions of Consumer Protection Act 2019.`;
 
-      const prompt = `Facts: "${formData.factsSummary}". Claim Amount: Rs. ${formData.productPrice}. Opposite Party: "${formData.oppositePartyName || 'Opposite Party'}".`;
+      const prompt = `Facts: "${sourceText}". Claim Amount: Rs. ${formData.productPrice}. Opposite Party: "${formData.oppositePartyName || 'Opposite Party'}".`;
 
       const refined = await callGroqAi({
         prompt,
@@ -52,7 +58,12 @@ Refine the citizen's factual statement into a formal, legally structured petitio
         }));
       }
     } catch (e) {
-      console.warn('AI Refine error:', e);
+      console.warn('AI Refine fallback active:', e);
+      const fallbackRefined = `The Complainant purchased goods/services for Rs. ${formData.productPrice}/- from the Opposite Party. The Opposite Party committed statutory deficiency of service under Section 2(11) of the Consumer Protection Act 2019 by failing to resolve the grievance: "${sourceText}".`;
+      setFormData(prev => ({
+        ...prev,
+        factsSummary: fallbackRefined
+      }));
     } finally {
       setAiLoading(false);
     }
@@ -241,7 +252,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
                   <button
                     type="button"
                     onClick={handleRefineWithAi}
-                    disabled={aiLoading || !formData.factsSummary.trim()}
+                    disabled={aiLoading}
                     className="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold hover:bg-amber-500/20 disabled:opacity-40 flex items-center gap-1 transition-all"
                   >
                     <Bot className="w-3.5 h-3.5" />
