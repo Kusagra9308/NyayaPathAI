@@ -117,7 +117,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-       
+        {/* Left Input Form Column */}
         <div className="lg:col-span-6 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
             
@@ -138,7 +138,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
 
             <form onSubmit={handleGenerate} className="space-y-4">
               
-             // find dispute category
+              {/* Dispute Category Dropdown */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300">Dispute Type / Category *</label>
                 <select
@@ -152,7 +152,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
                 </select>
               </div>
 
-             // complaint details
+              {/* Complainant Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Complainant Full Name *</label>
@@ -178,7 +178,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
                 </div>
               </div>
 
-             // opposite party details 
+              {/* Opposite Party Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Opposite Party / Company Name *</label>
@@ -203,7 +203,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
                 </div>
               </div>
 
-              
+              {/* Quantum Claim Sliders / Inputs */}
               <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
                   <DollarSign className="w-3.5 h-3.5" /> Itemized Monetary Claim Breakdown:
@@ -245,7 +245,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
                 </div>
               </div>
 
-              // ai refiner 
+              {/* Factual Summary & AI Refiner */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-300">Statement of Facts &amp; Deficiency Summary *</label>
@@ -281,7 +281,7 @@ Refine the citizen's factual statement into a formal, legally structured petitio
           </div>
         </div>
 
-       // output 
+        {/* Right Output Column */}
         <div className="lg:col-span-6 space-y-6">
           {generatedPetition ? (
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col h-full justify-between">

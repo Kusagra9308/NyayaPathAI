@@ -95,7 +95,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
   return (
     <div className="space-y-8 animate-fade-in">
       
-    
+      {/* Intro Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         
@@ -114,7 +114,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-      
+        {/* Left Form Column */}
         <div className="lg:col-span-6 space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
             
@@ -135,7 +135,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
 
             <form onSubmit={handleGenerate} className="space-y-4">
               
-            
+              {/* Category Selector */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300">Statutory Entitlement Category *</label>
                 <select
@@ -149,7 +149,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
                 </select>
               </div>
 
-              // income and location
+              {/* Income & Location */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Annual Family Income (₹)</label>
@@ -173,7 +173,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
                 </div>
               </div>
 
-              
+              {/* Statutory Eligibility Result Badge */}
               <div className={`p-4 rounded-2xl border space-y-1.5 ${
                 eligibility.eligible
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
@@ -191,7 +191,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
                 <p className="text-xs leading-relaxed">{eligibility.reason}</p>
               </div>
 
-              // applicant name and phone 
+              {/* Applicant Name & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300">Applicant Full Name *</label>
@@ -217,7 +217,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
                 </div>
               </div>
 
-              // case detail and ai refiner 
+              {/* Case Details & AI Refiner */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-300">Describe Your Legal Case / Dispute *</label>
@@ -253,7 +253,7 @@ Refine the citizen's legal issue into a clear, structured summary paragraph for 
           </div>
         </div>
 
-        // output
+        {/* Right Output Column */}
         <div className="lg:col-span-6 space-y-6">
           {generatedApplication ? (
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col h-full justify-between">

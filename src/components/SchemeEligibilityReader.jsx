@@ -17,7 +17,7 @@ export const SchemeEligibilityReader = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       
-     
+      {/* Interactive Profile Form Banner */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
@@ -29,7 +29,7 @@ export const SchemeEligibilityReader = () => {
           </div>
         </div>
 
-        
+        {/* Profile Inputs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           
           <div className="space-y-1 bg-slate-950 p-3 rounded-2xl border border-slate-800">
@@ -151,13 +151,13 @@ export const SchemeEligibilityReader = () => {
                   {scheme.brief}
                 </p>
 
-                
+                {/* Key Benefits */}
                 <div className="bg-orange-500/5 p-3 rounded-2xl border border-orange-500/20 text-xs space-y-1">
                   <span className="font-bold text-orange-400 text-[11px] uppercase tracking-wider">Entitlement Benefit:</span>
                   <p className="text-orange-200 font-semibold">{scheme.benefits}</p>
                 </div>
 
-               
+                {/* Ineligibility Warning Reasons */}
                 {reasons.length > 0 && (
                   <div className="bg-rose-950/20 border border-rose-800/30 rounded-2xl p-3 text-xs text-rose-300 space-y-1">
                     <span className="font-bold text-rose-400 text-[11px]">Criteria Note:</span>
@@ -167,7 +167,7 @@ export const SchemeEligibilityReader = () => {
                   </div>
                 )}
 
-                
+                {/* Documents Checklist */}
                 <div className="space-y-1.5 pt-1">
                   <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
                     <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" /> Mandatory Document Checklist:
@@ -182,7 +182,7 @@ export const SchemeEligibilityReader = () => {
                 </div>
               </div>
 
-              
+              {/* Portal Direct Button */}
               <div className="pt-3 border-t border-slate-800/80">
                 <a
                   href={scheme.portalUrl}

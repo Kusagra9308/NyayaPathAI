@@ -164,10 +164,10 @@ Immediate resolution within 30 days under CPGRAMS guidelines.
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
       
-    
+      {/* Conversational AI Chat Column */}
       <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between h-[620px] shadow-2xl">
         
-      
+        {/* Chat header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center">
@@ -190,7 +190,7 @@ Immediate resolution within 30 days under CPGRAMS guidelines.
           </button>
         </div>
 
-       // message history 
+        {/* Chat message history list */}
         <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-2">
           {messages.map((msg) => (
             <div
@@ -220,7 +220,7 @@ Immediate resolution within 30 days under CPGRAMS guidelines.
           )}
         </div>
 
-     // input box
+        {/* Input box */}
         <div className="flex items-center gap-2 pt-3 border-t border-slate-800">
           <input
             type="text"
@@ -242,7 +242,7 @@ Immediate resolution within 30 days under CPGRAMS guidelines.
 
       </div>
 
-      // cp gram filler 
+      {/* Auto-Populated CPGRAMS Form Output Column */}
       <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between h-[620px] shadow-2xl">
         {completedDraft ? (
           <div className="space-y-4 flex flex-col h-full justify-between">
